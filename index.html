@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Daily Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Rozha+One&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260529-1" />
+  </head>
+  <body>
+    <main class="phone" aria-label="Daily Care medication tracker">
+      <section class="top-row">
+        <h1 id="pageTitle">Daily Care</h1>
+        <button class="month-button" id="monthButton" type="button" aria-label="Select month">
+          <span id="monthLabel">May</span>
+          <span class="chevron"></span>
+        </button>
+      </section>
+
+      <section class="month-popover" id="monthPicker" aria-label="Select year and month" hidden>
+        <div class="year-switch">
+          <button class="year-button" id="prevYear" type="button" aria-label="Previous year">
+            <span class="arrow-left"></span>
+          </button>
+          <strong id="pickerYear">2026</strong>
+          <button class="year-button" id="nextYear" type="button" aria-label="Next year">
+            <span class="arrow-right"></span>
+          </button>
+        </div>
+        <div class="month-grid" id="monthGrid"></div>
+      </section>
+
+      <nav class="date-strip" id="dateStrip" aria-label="Choose date"></nav>
+
+      <section class="cards" id="homeView" aria-label="Medication list"></section>
+
+      <section class="mine-view" id="mineView" aria-label="Medication history" hidden>
+        <section class="weekly-chart" id="weeklyChart" aria-label="Monthly medication usage"></section>
+        <div class="mine-list" id="mineList"></div>
+      </section>
+
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button class="tab active" id="homeTab" type="button">Home</button>
+        <button class="tab" id="mineTab" type="button">Mine</button>
+      </nav>
+
+      <section class="dose-sheet" id="doseSheet" aria-label="Select dose" hidden>
+        <button class="sheet-backdrop" id="doseBackdrop" type="button" aria-label="Close dose picker"></button>
+        <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="doseTitle">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="sheet-header">
+            <h2 id="doseTitle">选择剂量</h2>
+            <button class="sheet-close" id="doseClose" type="button" aria-label="Close dose picker">×</button>
+          </div>
+          <div class="dose-options" id="doseOptions"></div>
+        </div>
+      </section>
+
+      <section class="dose-sheet add-sheet" id="addSheet" aria-label="Add medication" hidden>
+        <button class="sheet-backdrop" id="addBackdrop" type="button" aria-label="Close add medication"></button>
+        <form class="sheet-panel add-panel" id="addMedicineForm" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div class="sheet-header">
+            <h2 id="addTitle">添加药品</h2>
+            <button class="sheet-close" id="addClose" type="button" aria-label="Close add medication">×</button>
+          </div>
+          <label class="image-upload">
+            <input id="addImageInput" type="file" accept="image/*" required />
+            <span class="image-preview" id="addImagePreview">
+              <span class="add-icon" aria-hidden="true"></span>
+            </span>
+            <span>上传图片</span>
+          </label>
+          <label class="field-label">
+            <span>药品名称</span>
+            <input id="addNameInput" type="text" autocomplete="off" placeholder="输入名称" required />
+          </label>
+          <div class="field-label">
+            <span>剂量</span>
+            <div class="dose-options add-dose-options" id="addDoseOptions"></div>
+          </div>
+          <button class="add-submit" type="submit">添加</button>
+        </form>
+      </section>
+
+    </main>
+
+    <script src="./app.js?v=20260529-1"></script>
+  </body>
+</html>
