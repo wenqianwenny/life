@@ -291,34 +291,46 @@ function readWindowNameStorage() {
 }
 
 function writeWindowNameStorage(value) {
-  const payload = readWindowNamePayload();
-  const order = payload && Array.isArray(payload.order) ? payload.order : readMedicineOrder();
-  const savedCustomMedicines = payload && Array.isArray(payload.customMedicines) ? payload.customMedicines : customMedicines;
-  window.name = `${windowNamePrefix}${JSON.stringify({
-    records: parseStoredRecords(value) || {},
-    order: order || medicines.map((medicine) => medicine.id),
-    customMedicines: savedCustomMedicines || [],
-  })}`;
+  try {
+    const payload = readWindowNamePayload();
+    const order = payload && Array.isArray(payload.order) ? payload.order : readMedicineOrder();
+    const savedCustomMedicines = payload && Array.isArray(payload.customMedicines) ? payload.customMedicines : customMedicines;
+    window.name = `${windowNamePrefix}${JSON.stringify({
+      records: parseStoredRecords(value) || {},
+      order: order || medicines.map((medicine) => medicine.id),
+      customMedicines: savedCustomMedicines || [],
+    })}`;
+  } catch {
+    // Large uploaded images can make this backup too big on some mobile browsers.
+  }
 }
 
 function writeWindowNameOrder(order) {
-  const payload = readWindowNamePayload();
-  const savedCustomMedicines = payload && Array.isArray(payload.customMedicines) ? payload.customMedicines : customMedicines;
-  window.name = `${windowNamePrefix}${JSON.stringify({
-    records,
-    order,
-    customMedicines: savedCustomMedicines || [],
-  })}`;
+  try {
+    const payload = readWindowNamePayload();
+    const savedCustomMedicines = payload && Array.isArray(payload.customMedicines) ? payload.customMedicines : customMedicines;
+    window.name = `${windowNamePrefix}${JSON.stringify({
+      records,
+      order,
+      customMedicines: savedCustomMedicines || [],
+    })}`;
+  } catch {
+    // Keep the primary localStorage data even if the window-name backup fails.
+  }
 }
 
 function writeWindowNameCustomMedicines(nextCustomMedicines) {
-  const payload = readWindowNamePayload();
-  const order = payload && Array.isArray(payload.order) ? payload.order : medicines.map((medicine) => medicine.id);
-  window.name = `${windowNamePrefix}${JSON.stringify({
-    records,
-    order,
-    customMedicines: nextCustomMedicines,
-  })}`;
+  try {
+    const payload = readWindowNamePayload();
+    const order = payload && Array.isArray(payload.order) ? payload.order : medicines.map((medicine) => medicine.id);
+    window.name = `${windowNamePrefix}${JSON.stringify({
+      records,
+      order,
+      customMedicines: nextCustomMedicines,
+    })}`;
+  } catch {
+    // Keep custom medicines in localStorage when this secondary backup is unavailable.
+  }
 }
 
 function readWindowNamePayload() {
@@ -344,13 +356,26 @@ function parseStoredRecords(value) {
 }
 
 function migrateRecords(source) {
-  Object.values(source).forEach((day) => {
-    Object.values(day).forEach((record) => {
-      if (record.dose === "1/2piece") record.dose = "0.5piece";
-      if (record.dose === "1/4piece") record.dose = "0.25piece";
+  if (!source || typeof source !== "object" || Array.isArray(source)) return {};
+
+  const migrated = {};
+  Object.entries(source).forEach(([key, day]) => {
+    if (!day || typeof day !== "object" || Array.isArray(day)) return;
+
+    const nextDay = {};
+    Object.entries(day).forEach(([medicineId, record]) => {
+      if (!record || typeof record !== "object" || Array.isArray(record)) return;
+
+      const nextRecord = { ...record };
+      if (nextRecord.dose === "1/2piece") nextRecord.dose = "0.5piece";
+      if (nextRecord.dose === "1/4piece") nextRecord.dose = "0.25piece";
+      nextDay[medicineId] = nextRecord;
     });
+
+    migrated[key] = nextDay;
   });
-  return source;
+
+  return migrated;
 }
 
 function getCloudPayload() {
