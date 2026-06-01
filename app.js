@@ -11,6 +11,9 @@ const productionOrigin = "https://life-two-amber.vercel.app";
 const doseOptions = ["0.25", "0.5", "1", "1.25", "1.5", "2", "3", "4"];
 const customMedicineColors = ["#b7c9e3", "#d3c6e6", "#e5da92", "#e9d0b1", "#ececa8", "#7f8d67"];
 
+window.addEventListener("error", (event) => showLoadError(event.error || event.message));
+window.addEventListener("unhandledrejection", (event) => showLoadError(event.reason || "Unexpected async error"));
+
 const defaultMedicines = [
   {
     id: "lifespace",
@@ -859,6 +862,8 @@ function updateMedicineOrderFromDom() {
 }
 
 function openDoseSheet(medicine) {
+  if (!doseSheet || !doseTitle || !doseOptionsList) return;
+
   activeDoseMedicine = medicine;
   const record = peekDayRecord(medicine.id);
   const currentDose = record.dose || medicine.dose;
@@ -888,6 +893,8 @@ function openDoseSheet(medicine) {
 }
 
 function closeDoseSheet() {
+  if (!doseSheet) return;
+
   doseSheet.hidden = true;
   activeDoseMedicine = null;
 }
@@ -1183,40 +1190,40 @@ function render() {
   renderMine();
 }
 
-monthButton.addEventListener("click", () => {
+monthButton?.addEventListener("click", () => {
   pickerYear = selectedDate.getFullYear();
   monthPicker.hidden = !monthPicker.hidden;
   renderMonthPicker();
 });
 
-prevYear.addEventListener("click", () => {
+prevYear?.addEventListener("click", () => {
   pickerYear -= 1;
   renderMonthPicker();
 });
 
-nextYear.addEventListener("click", () => {
+nextYear?.addEventListener("click", () => {
   pickerYear += 1;
   renderMonthPicker();
 });
 
 document.addEventListener("click", (event) => {
-  if (monthPicker.hidden) return;
-  if (monthPicker.contains(event.target) || monthButton.contains(event.target)) return;
+  if (!monthPicker || monthPicker.hidden) return;
+  if (monthPicker.contains(event.target) || monthButton?.contains(event.target)) return;
   monthPicker.hidden = true;
 });
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
-    monthPicker.hidden = true;
+    if (monthPicker) monthPicker.hidden = true;
     closeDoseSheet();
     closeAddSheet();
   }
 });
 
-homeTab.addEventListener("click", () => showTab("home"));
-mineTab.addEventListener("click", () => showTab("mine"));
-doseBackdrop.addEventListener("click", closeDoseSheet);
-doseClose.addEventListener("click", closeDoseSheet);
+homeTab?.addEventListener("click", () => showTab("home"));
+mineTab?.addEventListener("click", () => showTab("mine"));
+doseBackdrop?.addEventListener("click", closeDoseSheet);
+doseClose?.addEventListener("click", closeDoseSheet);
 addBackdrop?.addEventListener("click", closeAddSheet);
 addClose?.addEventListener("click", closeAddSheet);
 addMedicineForm?.addEventListener("submit", addCustomMedicine);
@@ -1240,6 +1247,18 @@ function clearStorage(key) {
   }
 }
 
+function showLoadError(error) {
+  const target = document.querySelector("#homeView") || document.querySelector(".phone") || document.body;
+  if (!target || target.dataset.errorShown === "true") return;
+
+  target.dataset.errorShown = "true";
+  target.innerHTML = `
+    <p class="load-error">
+      页面加载失败，但数据还在浏览器本地。请先不要清理 Safari 数据。错误：${escapeHtml(error && error.message ? error.message : error)}
+    </p>
+  `;
+}
+
 window.addEventListener("pageshow", () => {
   records = migrateRecords(readRecords());
   customMedicines = readCustomMedicines();
@@ -1257,6 +1276,6 @@ try {
   render();
   initCloudSync();
 } catch (error) {
-  cards.innerHTML = `<p class="load-error">Unable to load records. Refresh once or clear local records.</p>`;
+  showLoadError(error);
   console.error(error);
 }
