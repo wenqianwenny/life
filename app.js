@@ -1190,25 +1190,31 @@ function render() {
   renderMine();
 }
 
-monthButton?.addEventListener("click", () => {
-  pickerYear = selectedDate.getFullYear();
-  monthPicker.hidden = !monthPicker.hidden;
-  renderMonthPicker();
-});
+if (monthButton) {
+  monthButton.addEventListener("click", () => {
+    pickerYear = selectedDate.getFullYear();
+    monthPicker.hidden = !monthPicker.hidden;
+    renderMonthPicker();
+  });
+}
 
-prevYear?.addEventListener("click", () => {
-  pickerYear -= 1;
-  renderMonthPicker();
-});
+if (prevYear) {
+  prevYear.addEventListener("click", () => {
+    pickerYear -= 1;
+    renderMonthPicker();
+  });
+}
 
-nextYear?.addEventListener("click", () => {
-  pickerYear += 1;
-  renderMonthPicker();
-});
+if (nextYear) {
+  nextYear.addEventListener("click", () => {
+    pickerYear += 1;
+    renderMonthPicker();
+  });
+}
 
 document.addEventListener("click", (event) => {
   if (!monthPicker || monthPicker.hidden) return;
-  if (monthPicker.contains(event.target) || monthButton?.contains(event.target)) return;
+  if (monthPicker.contains(event.target) || (monthButton && monthButton.contains(event.target))) return;
   monthPicker.hidden = true;
 });
 
@@ -1220,25 +1226,29 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-homeTab?.addEventListener("click", () => showTab("home"));
-mineTab?.addEventListener("click", () => showTab("mine"));
-doseBackdrop?.addEventListener("click", closeDoseSheet);
-doseClose?.addEventListener("click", closeDoseSheet);
-addBackdrop?.addEventListener("click", closeAddSheet);
-addClose?.addEventListener("click", closeAddSheet);
-addMedicineForm?.addEventListener("submit", addCustomMedicine);
-addImageInput?.addEventListener("change", () => {
-  const file = addImageInput.files && addImageInput.files[0];
-  if (!file) return;
+if (homeTab) homeTab.addEventListener("click", () => showTab("home"));
+if (mineTab) mineTab.addEventListener("click", () => showTab("mine"));
+if (doseBackdrop) doseBackdrop.addEventListener("click", closeDoseSheet);
+if (doseClose) doseClose.addEventListener("click", closeDoseSheet);
+if (addBackdrop) addBackdrop.addEventListener("click", closeAddSheet);
+if (addClose) addClose.addEventListener("click", closeAddSheet);
+if (addMedicineForm) addMedicineForm.addEventListener("submit", addCustomMedicine);
+if (addImageInput) {
+  addImageInput.addEventListener("change", () => {
+    const file = addImageInput.files && addImageInput.files[0];
+    if (!file) return;
 
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    pendingMedicineImage = String(reader.result || "");
-    addImagePreview?.classList.add("has-image");
-    if (addImagePreview) addImagePreview.style.backgroundImage = `url("${pendingMedicineImage}")`;
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      pendingMedicineImage = String(reader.result || "");
+      if (addImagePreview) {
+        addImagePreview.classList.add("has-image");
+        addImagePreview.style.backgroundImage = `url("${pendingMedicineImage}")`;
+      }
+    });
+    reader.readAsDataURL(file);
   });
-  reader.readAsDataURL(file);
-});
+}
 function clearStorage(key) {
   try {
     localStorage.removeItem(key);
